@@ -37,4 +37,4 @@ class BookmarkInstanceForm(forms.ModelForm):
     
     class Meta:
         model = BookmarkInstance
-        #fields = ('url', 'description', 'note', 'redirect')
+        fields = ('url', 'description', 'note', 'tags', 'redirect')
