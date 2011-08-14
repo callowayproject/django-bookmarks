@@ -92,6 +92,12 @@ class Bookmark(models.Model):
 
 
 class BookmarkInstance(models.Model):
+    """
+    This model is created regardless of the setting MULTIUSER to make it easy
+    to enable without having to worry about database table creation.
+    
+    Its admin will not show, however, if MULTIUSER is False
+    """
     
     bookmark = models.ForeignKey(Bookmark, related_name="saved_instances", verbose_name=_('bookmark'))
     user = models.ForeignKey(User, related_name="saved_bookmarks", verbose_name=_('user'))
