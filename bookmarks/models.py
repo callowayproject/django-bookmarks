@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 
-from settings import VERIFY_EXISTS, USE_TAGGING
+from settings import VERIFY_EXISTS, USE_TAGGING, ABSOLUTE_URL_IS_BOOKMARK
 
 if USE_TAGGING:
     try:
@@ -74,15 +74,19 @@ class Bookmark(models.Model):
     def __unicode__(self):
         return self.url
     
-    @permalink
-    def get_absolute_url(self):
-        return ('bookmark_detail', None, {
-            'year': self.added.year,
-            'month': self.added.strftime('%b').lower(),
-            'day': self.added.day,
-            'slug': self.slug
-        })
-    
+    if ABSOLUTE_URL_IS_BOOKMARK:
+        def get_absolute_url(self):
+            return self.url
+    else:
+        @permalink
+        def get_absolute_url(self):
+            return ('bookmark_detail', None, {
+                'year': self.added.year,
+                'month': self.added.strftime('%b').lower(),
+                'day': self.added.day,
+                'slug': self.slug
+            })
+        
     class Meta:
         ordering = ('-added', )
 
