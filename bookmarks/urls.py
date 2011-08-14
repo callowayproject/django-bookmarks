@@ -1,9 +1,15 @@
 from django.conf.urls.defaults import *
-from bookmarks.models import Bookmark
-from bookmarks.forms import BookmarkInstanceForm, BookmarkInstanceEditForm
+from models import Bookmark
+from forms import BookmarkInstanceForm, BookmarkInstanceEditForm
+from feeds import (BookmarkFeed, UserBookmarkFeed, 
+                    AtomBookmarkFeed, AtomUserBookmarkFeed)
 
 urlpatterns = patterns('',
     url(r'^$', 'bookmarks.views.bookmarks', name="all_bookmarks"),
+    url(r'^rss/$', BookmarkFeed(), name='rss_all_bookmarks'),
+    url(r'^rss/(?P<username>.+)/$', UserBookmarkFeed(), name='rss_user_bookmarks'),
+    url(r'^atom/$', AtomBookmarkFeed(), name='atom_all_bookmarks'),
+    url(r'^atom/(?P<username>.+)/$', AtomUserBookmarkFeed(), name='atom_user_bookmarks'),
     url(r'^(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/(?P<slug>[-\w]+)/$',
         view='bookmarks.views.bookmark_detail',
         name='bookmark_detail'),
