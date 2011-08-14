@@ -11,8 +11,8 @@ from django.contrib.sites.models import Site
 
 from django.utils.translation import ugettext_lazy as _
 
-from bookmarks.models import Bookmark, BookmarkInstance, BookmarkInstanceEditForm
-from bookmarks.forms import BookmarkInstanceForm
+from bookmarks.models import Bookmark, BookmarkInstance
+from bookmarks.forms import BookmarkInstanceForm, BookmarkInstanceEditForm
 from django.views.generic import date_based
 
 def bookmarks(request, template_name='bookmarks/bookmarks.html'):
