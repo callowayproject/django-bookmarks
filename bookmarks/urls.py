@@ -21,24 +21,8 @@ urlpatterns = patterns('',
     # for json
     url(r'^json/(?P<model_name>[\d\w]+)/$', 'bookmarks.serializers.bookmarks_json'),
     url(r'^json/(?P<model_name>[\d\w]+)/(?P<object_id>\d+)/$', 'bookmarks.serializers.bookmarks_json'),
-#    (r'^json/', include('json.urls')),
+    
     # for xml
     url(r'^xml/(?P<model_name>[\d\w]+)/$', 'bookmarks.serializers.bookmarks_xml'),
     url(r'^xml/(?P<model_name>[\d\w]+)/(?P<object_id>\d+)/$', 'bookmarks.serializers.bookmarks_xml'),
-
-    # ajax validation
-    (r'^validate_add/$', 'ajax_validation.views.validate', 
-        {'form_class': BookmarkInstanceForm, 
-        'callback': lambda request, 
-        *args, 
-        **kwargs: {'user': request.user}}, 
-        'bookmark_instance_form_validate'),
-        
-    # ajax validation
-    (r'^validate_edit/$', 'ajax_validation.views.validate', 
-        {'form_class': BookmarkInstanceEditForm, 
-        'callback': lambda request, 
-        *args, 
-        **kwargs: {'user': request.user}}, 
-        'bookmark_instance_edit_form_validate'),
 )
