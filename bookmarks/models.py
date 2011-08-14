@@ -79,17 +79,20 @@ class BookmarkInstance(models.Model):
     description = models.CharField(_('description'), max_length=100)
     note = models.TextField(_('note'), blank=True)
     
-    tags = TagField()
+    #tags = TagField()
     
-    def save(self, force_insert=False, force_update=False):
-        try:
-            bookmark = Bookmark.objects.get(url=self.url)
-        except Bookmark.DoesNotExist:
-            # has_favicon=False is temporary as the view for adding bookmarks will change it
-            bookmark = Bookmark(url=self.url, description=self.description, note=self.note, has_favicon=False, adder=self.user)
-            bookmark.save()
-        self.bookmark = bookmark
-        super(BookmarkInstance, self).save(force_insert, force_update)
+    def save(self, force_insert=False, force_update=False, edit=False):
+        if edit:
+            super(BookmarkInstance, self).save(force_insert, True)
+        else:
+            try:
+                bookmark = Bookmark.objects.get(url=self.url)
+            except Bookmark.DoesNotExist:
+                # has_favicon=False is temporary as the view for adding bookmarks will change it
+                bookmark = Bookmark(url=self.url, description=self.description, note=self.note, has_favicon=False, adder=self.user)
+                bookmark.save()
+            self.bookmark = bookmark
+            super(BookmarkInstance, self).save(force_insert, force_update)
     
     def delete(self):
         bookmark = self.bookmark

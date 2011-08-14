@@ -2,7 +2,7 @@ from datetime import datetime
 import urlparse
 import urllib2
 
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -11,7 +11,7 @@ from django.contrib.sites.models import Site
 
 from django.utils.translation import ugettext_lazy as _
 
-from bookmarks.models import Bookmark, BookmarkInstance
+from bookmarks.models import Bookmark, BookmarkInstance, BookmarkInstanceEditForm
 from bookmarks.forms import BookmarkInstanceForm
 from django.views.generic import date_based
 
@@ -121,3 +121,36 @@ def delete(request, bookmark_instance_id):
         next = reverse("bookmarks.views.bookmarks")
 
     return HttpResponseRedirect(next)
+
+@login_required
+def edit(request, bookmark_instance_id):    
+    bookmark_instance = get_object_or_404(BookmarkInstance, id=bookmark_instance_id)
+    
+    if request.method == "POST":
+        bookmark_form = BookmarkInstanceEditForm(request.user, request.POST, instance=bookmark_instance)
+        if bookmark_form.is_valid():
+            bookmark_instance = bookmark_form.save(commit=False)
+            bookmark_instance.user = request.user
+            bookmark_instance.save(edit=True)
+
+            
+            if request.POST.get('redirect',None):
+                return HttpResponseRedirect(bookmark_instance.bookmark.url)
+            else:
+                request.user.message_set.create(message=_("You have finished editing bookmark '%(description)s'") % {'description': bookmark_instance.description})
+                return HttpResponseRedirect(reverse("bookmarks.views.your_bookmarks"))
+    elif request.user == bookmark_instance.user:
+            data = dict(      
+                description=bookmark_instance.description,
+                note=bookmark_instance.note,
+                tags=bookmark_instance.tags
+            )
+            bookmark_form = BookmarkInstanceEditForm(initial=data) 
+
+    bookmarks_add_url = "http://" + Site.objects.get_current().domain + reverse(add)
+    bookmarklet = "javascript:location.href='%s?url='+encodeURIComponent(location.href)+';description='+encodeURIComponent(document.title)+';redirect=on'" % bookmarks_add_url
+
+    return render_to_response("bookmarks/edit.html", {
+        "bookmarklet": bookmarklet,
+        "bookmark_form": bookmark_form,
+    }, context_instance=RequestContext(request))        

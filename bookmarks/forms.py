@@ -3,11 +3,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from tagging.forms import TagField
 
-from bookmarks.models import Bookmark, BookmarkInstance
+from models import Bookmark, BookmarkInstance
+from settings import VERIFY_EXISTS
 
 class BookmarkInstanceForm(forms.ModelForm):
     
-    url = forms.URLField(label = "URL", verify_exists=True, widget=forms.TextInput(attrs={"size": 40}))
+    url = forms.URLField(label = "URL", verify_exists=VERIFY_EXISTS, widget=forms.TextInput(attrs={"size": 40}))
     description = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"size": 40}))
     redirect = forms.BooleanField(label="Redirect", required=False)
     tags = TagField(label="Tags", required=False)
@@ -38,3 +39,29 @@ class BookmarkInstanceForm(forms.ModelForm):
     class Meta:
         model = BookmarkInstance
         fields = ('url', 'description', 'note', 'tags', 'redirect')
+
+
+class BookmarkInstanceEditForm(forms.ModelForm):
+    description = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"size": 40}))
+    redirect = forms.BooleanField(label="Redirect", required=False)
+    tags = TagField(label="Tags", required=False)
+
+    def __init__(self, user=None,  *args, **kwargs):
+        self.user = user
+        super(BookmarkInstanceEditForm, self).__init__(*args, **kwargs)
+        # hack to order fields
+        self.fields.keyOrder = ['description', 'note', 'tags', 'redirect']
+
+    def should_redirect(self):
+        if self.cleaned_data["redirect"]:
+            return True
+        else:
+            return False
+
+    class Meta:
+        model = BookmarkInstance
+        #fields = ('description', 'note', 'redirect')        
+
+    def clean(self):
+        # The Bookmark Instance doesn't have a url field, as we can't change it.
+        return self.cleaned_data
