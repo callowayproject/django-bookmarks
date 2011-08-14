@@ -1,31 +1,28 @@
 from datetime import datetime
 import urlparse
 
+from django.db.models import permalink
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
 
-from tagging.fields import TagField
-from tagging.models import Tag
+from settings import VERIFY_EXISTS, USE_TAGGING
 
-"""
-A Bookmark is unique to a URL whereas a BookmarkInstance represents a
-particular Bookmark saved by a particular person.
+if USE_TAGGING:
+    try:
+        from tagging.fields import TagField
+        from tagging.models import Tag
+    except ImportError:
+        raise ImproperlyConfigured("Django Tagging is not installed but is"
+            " configured for use in Django Bookmarks.")
 
-This not only enables more than one user to save the same URL as a
-bookmark but allows for per-user tagging.
-"""
-
-# at the moment Bookmark has some fields that are determined by the
-# first person to add the bookmark (the adder) but later we may add
-# some notion of voting for the best description and note from
-# amongst those in the instances.
 
 class Bookmark(models.Model):
     
     url = models.URLField(unique=True)
     description = models.CharField(_('description'), max_length=100)
+    slug = models.SlugField()
     note = models.TextField(_('note'), blank=True)
     
     has_favicon = models.BooleanField(_('has favicon'))
@@ -59,6 +56,15 @@ class Bookmark(models.Model):
     
     def __unicode__(self):
         return self.url
+    
+    @permalink
+    def get_absolute_url(self):
+        return ('bookmark_detail', None, {
+            'year': self.added.year,
+            'month': self.added.strftime('%b').lower(),
+            'day': self.added.day,
+            'slug': self.slug
+        })
     
     class Meta:
         ordering = ('-added', )
