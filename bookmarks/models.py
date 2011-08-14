@@ -1,3 +1,11 @@
+"""
+A Bookmark is unique to a URL whereas a BookmarkInstance represents a
+particular Bookmark saved by a particular person.
+
+This not only enables more than one user to save the same URL as a
+bookmark but allows for per-user tagging.
+"""
+
 from datetime import datetime
 import urlparse
 
@@ -32,7 +40,10 @@ class Bookmark(models.Model):
                     related_name="added_bookmarks", verbose_name=_('adder'))
     added = models.DateTimeField(_('added'), default=datetime.now)
     
-    # tags = TagField()
+    if USE_TAGGING:
+        tags = TagField()
+    else:
+        tags = models.CharField(blank=True, default='', max_length=255)
     
     def get_favicon_url(self, force=False):
         """
