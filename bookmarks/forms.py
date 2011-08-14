@@ -1,10 +1,13 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from tagging.forms import TagField
-
 from models import Bookmark, BookmarkInstance
-from settings import VERIFY_EXISTS
+from settings import VERIFY_EXISTS, USE_TAGGING
+
+if USE_TAGGING:
+    from tagging.forms import TagField
+else:
+    TagField = forms.CharField
 
 class BookmarkInstanceForm(forms.ModelForm):
     

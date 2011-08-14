@@ -60,10 +60,16 @@ class Bookmark(models.Model):
         return None
     
     def all_tags(self, min_count=False):
-        return Tag.objects.usage_for_model(BookmarkInstance, counts=False, min_count=None, filters={'bookmark': self.id})
+        if USE_TAGGING:
+            return Tag.objects.usage_for_model(BookmarkInstance, counts=False, min_count=None, filters={'bookmark': self.id})
+        else:
+            return self.tags.split(',')
     
     def all_tags_with_counts(self, min_count=False):
-        return Tag.objects.usage_for_model(BookmarkInstance, counts=True, min_count=None, filters={'bookmark': self.id})
+        if USE_TAGGING:
+            return Tag.objects.usage_for_model(BookmarkInstance, counts=True, min_count=None, filters={'bookmark': self.id})
+        else:
+            return self.tags.split(',')
     
     def __unicode__(self):
         return self.url
