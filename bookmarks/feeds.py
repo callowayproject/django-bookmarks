@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import linebreaks, escape
 from django.utils.feedgenerator import Atom1Feed
 
-from settings import ITEMS_PER_FEED, USE_TAGGING
-from models import Bookmark, BookmarkInstance
+from settings import ITEMS_PER_FEED, USE_TAGGING, MULTIUSER
+from models import Bookmark
 
 
 class BookmarkFeed(Feed):
@@ -50,39 +50,6 @@ class BookmarkFeed(Feed):
         else:
             return bookmark.tags.split(',')
 
-class UserBookmarkFeed(BookmarkFeed):
-    """
-    Bookmark feed for a specific user
-    """
-    def get_object(self, request, username, *args, **kwargs):
-        return get_object_or_404(User, username=username)
-    
-    def title(self, obj):
-        return "Bookmarks saved by %s" % (obj.get_full_name() or obj.username)
-    
-    def description(self, obj):
-        return "Latest bookmarks saved by %s" % (obj.get_full_name() or obj.username)
-    
-    def link(self, obj):
-        absolute_url = reverse('rss_user_bookmarks', kwargs={'username':obj.username})
-        return "http://%s%s" % (
-                Site.objects.get_current().domain,
-                absolute_url,
-            )
-    
-    def items(self, obj):
-        return BookmarkInstance.objects.filter(user=obj).order_by("-saved")[:ITEMS_PER_FEED]
-    
-    def author_name(self, obj):
-        return obj.get_full_name() or obj.username
-    
-    def author_email(self, obj):
-        return obj.email
-    
-    def item_pubdate(self, bookmark):
-        return bookmark.saved
-    
-
 class AtomBookmarkFeed(BookmarkFeed):
     feed_type = Atom1Feed
     subtitle = BookmarkFeed.description
@@ -90,11 +57,46 @@ class AtomBookmarkFeed(BookmarkFeed):
     def feed_guid(self):
         return self.link()
 
-class AtomUserBookmarkFeed(UserBookmarkFeed):
-    feed_type = Atom1Feed
-    subtitle = UserBookmarkFeed.description
+if MULTIUSER:
+    from models import BookmarkInstance
     
-    def feed_guid(self, obj):
-        return self.link(obj)
+    class UserBookmarkFeed(BookmarkFeed):
+        """
+        Bookmark feed for a specific user
+        """
+        def get_object(self, request, username, *args, **kwargs):
+            return get_object_or_404(User, username=username)
+
+        def title(self, obj):
+            return "Bookmarks saved by %s" % (obj.get_full_name() or obj.username)
+
+        def description(self, obj):
+            return "Latest bookmarks saved by %s" % (obj.get_full_name() or obj.username)
+
+        def link(self, obj):
+            absolute_url = reverse('rss_user_bookmarks', kwargs={'username':obj.username})
+            return "http://%s%s" % (
+                    Site.objects.get_current().domain,
+                    absolute_url,
+                )
+
+        def items(self, obj):
+            return BookmarkInstance.objects.filter(user=obj).order_by("-saved")[:ITEMS_PER_FEED]
+
+        def author_name(self, obj):
+            return obj.get_full_name() or obj.username
+
+        def author_email(self, obj):
+            return obj.email
+
+        def item_pubdate(self, bookmark):
+            return bookmark.saved
+
+    class AtomUserBookmarkFeed(UserBookmarkFeed):
+        feed_type = Atom1Feed
+        subtitle = UserBookmarkFeed.description
+
+        def feed_guid(self, obj):
+            return self.link(obj)
     
     

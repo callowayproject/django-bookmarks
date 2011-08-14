@@ -1,5 +1,7 @@
 from django.contrib import admin
-from bookmarks.models import Bookmark, BookmarkInstance
+
+from settings import MULTIUSER
+from bookmarks.models import Bookmark
 
 class BookmarkAdmin(admin.ModelAdmin):
     list_display = ('url', 'description', 'added', 'adder',)
@@ -7,4 +9,7 @@ class BookmarkAdmin(admin.ModelAdmin):
     raw_id_fields = ('adder',)
 
 admin.site.register(Bookmark, BookmarkAdmin)
-admin.site.register(BookmarkInstance)
+
+if MULTIUSER:
+    from bookmarks.models import BookmarkInstance
+    admin.site.register(BookmarkInstance)
