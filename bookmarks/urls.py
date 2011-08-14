@@ -12,6 +12,14 @@ urlpatterns = patterns('',
     url(r'^(\d+)/delete/$', 'bookmarks.views.delete', name="delete_bookmark_instance"),
     url(r'^(\d+)/edit/$', 'bookmarks.views.edit', name="edit_bookmark_instance"),    
     
+    # for json
+    url(r'^json/(?P<model_name>[\d\w]+)/$', 'bookmarks.serializers.bookmarks_json'),
+    url(r'^json/(?P<model_name>[\d\w]+)/(?P<object_id>\d+)/$', 'bookmarks.serializers.bookmarks_json'),
+#    (r'^json/', include('json.urls')),
+    # for xml
+    url(r'^xml/(?P<model_name>[\d\w]+)/$', 'bookmarks.serializers.bookmarks_xml'),
+    url(r'^xml/(?P<model_name>[\d\w]+)/(?P<object_id>\d+)/$', 'bookmarks.serializers.bookmarks_xml'),
+
     # ajax validation
     (r'^validate_add/$', 'ajax_validation.views.validate', 
         {'form_class': BookmarkInstanceForm, 
