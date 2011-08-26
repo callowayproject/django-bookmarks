@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
@@ -16,7 +14,7 @@ class BookmarkFeed(Feed):
     def title(self):
         return 'Bookmarks from %s' % Site.objects.get_current().domain
     def description(self):
-        return "Latest bookmarks from %s" % Site.objects.get_current().domain    
+        return "Latest bookmarks from %s" % Site.objects.get_current().domain
     
     def link(self):
         absolute_url = reverse('rss_all_bookmarks')
@@ -68,20 +66,24 @@ if MULTIUSER:
             return get_object_or_404(User, username=username)
 
         def title(self, obj):
-            return "Bookmarks saved by %s" % (obj.get_full_name() or obj.username)
+            return "Bookmarks saved by %s" % (
+                obj.get_full_name() or obj.username)
 
         def description(self, obj):
-            return "Latest bookmarks saved by %s" % (obj.get_full_name() or obj.username)
+            return "Latest bookmarks saved by %s" % (
+                obj.get_full_name() or obj.username)
 
         def link(self, obj):
-            absolute_url = reverse('rss_user_bookmarks', kwargs={'username':obj.username})
+            absolute_url = reverse('rss_user_bookmarks', kwargs={
+                'username':obj.username})
             return "http://%s%s" % (
                     Site.objects.get_current().domain,
                     absolute_url,
                 )
 
         def items(self, obj):
-            return BookmarkInstance.objects.filter(user=obj).order_by("-saved")[:ITEMS_PER_FEED]
+            return BookmarkInstance.objects.filter(
+                user=obj).order_by("-saved")[:ITEMS_PER_FEED]
 
         def author_name(self, obj):
             return obj.get_full_name() or obj.username
