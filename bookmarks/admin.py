@@ -12,4 +12,10 @@ admin.site.register(Bookmark, BookmarkAdmin)
 
 if MULTIUSER:
     from bookmarks.models import BookmarkInstance
-    admin.site.register(BookmarkInstance)
+    
+    class BookmarkInstanceAdmin(admin.ModelAdmin):
+        list_display = ('url', 'description', 'saved', 'user',)
+        fields = ('url', 'description', 'note', 'user', 'saved')
+        raw_id_fields = ('user',)
+    
+    admin.site.register(BookmarkInstance, BookmarkInstanceAdmin)

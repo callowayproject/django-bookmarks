@@ -10,22 +10,33 @@ else:
     TagField = forms.CharField
 
 class BookmarkInstanceForm(forms.ModelForm):
-    
-    url = forms.URLField(label = "URL", verify_exists=VERIFY_EXISTS, widget=forms.TextInput(attrs={"size": 40}))
-    description = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"size": 40}))
-    redirect = forms.BooleanField(label="Redirect", required=False)
-    tags = TagField(label="Tags", required=False)
+    url = forms.URLField(
+        label="URL", 
+        verify_exists=VERIFY_EXISTS, 
+        widget=forms.TextInput(attrs={"size": 40}))
+    description = forms.CharField(
+        max_length=100, 
+        widget=forms.TextInput(attrs={"size": 40}))
+    redirect = forms.BooleanField(
+        label="Redirect", 
+        required=False)
+    tags = TagField(
+        label="Tags", 
+        required=False)
     
     def __init__(self, user=None, *args, **kwargs):
         self.user = user
         super(BookmarkInstanceForm, self).__init__(*args, **kwargs)
         # hack to order fields
-        self.fields.keyOrder = ['url', 'description', 'note', 'tags', 'redirect']
+        self.fields.keyOrder = [
+            'url', 'description', 'note', 'tags', 'redirect']
     
     def clean(self):
         if 'url' not in self.cleaned_data:
             return
-        if BookmarkInstance.objects.filter(bookmark__url=self.cleaned_data['url'], user=self.user).count() > 0:
+        count = BookmarkInstance.objects.filter(
+            bookmark__url=self.cleaned_data['url'], user=self.user).count()
+        if  > 0:
             raise forms.ValidationError(_("You have already bookmarked this link."))
         return self.cleaned_data
                 
