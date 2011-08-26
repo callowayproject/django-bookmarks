@@ -36,7 +36,7 @@ class BookmarkInstanceForm(forms.ModelForm):
             return
         count = BookmarkInstance.objects.filter(
             bookmark__url=self.cleaned_data['url'], user=self.user).count()
-        if  > 0:
+        if count > 0:
             raise forms.ValidationError(_("You have already bookmarked this link."))
         return self.cleaned_data
                 
