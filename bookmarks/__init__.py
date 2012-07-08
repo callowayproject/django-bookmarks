@@ -6,6 +6,7 @@ __version_info__ = {
     'serial': 3
 }
 
+
 def get_version(short=False):
     assert __version_info__['releaselevel'] in ('alpha', 'beta', 'final')
     vers = ["%(major)i.%(minor)i" % __version_info__, ]

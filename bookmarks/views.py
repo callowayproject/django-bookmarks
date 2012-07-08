@@ -16,7 +16,7 @@ from settings import MULTIUSER
 
 if MULTIUSER:
     from models import BookmarkInstance
-    from forms import BookmarkInstanceEditForm
+
 
 def bookmarks(request, template_name='bookmarks/bookmarks.html'):
     all_bookmarks = Bookmark.objects.all().order_by("-added")
@@ -34,17 +34,18 @@ def bookmarks(request, template_name='bookmarks/bookmarks.html'):
     }, context_instance=RequestContext(request))
 
 
-def bookmark_detail(request, slug, year, month, day, template_name='bookmarks/bookmark_detail.html', **kwargs):
+def bookmark_detail(request, slug, year, month, day,
+    template_name='bookmarks/bookmark_detail.html', **kwargs):
     '''Detail bookmark view.'''
 
     return date_based.object_detail(
         request,
-        year = year,
-        month = month,
-        day = day,
-        date_field = 'added',
-        slug = slug,
-        queryset = Bookmark.objects.all(),
+        year=year,
+        month=month,
+        day=day,
+        date_field='added',
+        slug=slug,
+        queryset=Bookmark.objects.all(),
         template_object_name='bookmark',
         template_name=template_name,
         **kwargs
@@ -57,10 +58,11 @@ def your_bookmarks(request):
         bookmark_instances = BookmarkInstance.objects.filter(user=request.user).order_by("-saved")
     else:
         bookmark_instances = Bookmark.objects.filter(adder=request.user).order_by("-added")
-    
+
     return render_to_response("bookmarks/your_bookmarks.html", {
         "bookmark_instances": bookmark_instances,
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def add(request):
@@ -75,10 +77,10 @@ def add(request):
 
             try:
                 headers = {
-                    "Accept" : "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
-                    "Accept-Language" : "en-us,en;q=0.5",
+                    "Accept": "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
+                    "Accept-Language": "en-us,en;q=0.5",
                     "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-                    "Connection" : "close",
+                    "Connection": "close",
                     ##"User-Agent": settings.URL_VALIDATOR_USER_AGENT
                     }
                 req = urllib2.Request(bookmark.get_favicon_url(force=True), None, headers)
@@ -118,6 +120,7 @@ def add(request):
         "bookmark_form": bookmark_form,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def delete(request, bookmark_instance_id):
 
@@ -133,10 +136,11 @@ def delete(request, bookmark_instance_id):
 
     return HttpResponseRedirect(next)
 
+
 @login_required
-def edit(request, bookmark_instance_id):    
+def edit(request, bookmark_instance_id):
     bookmark_instance = get_object_or_404(BookmarkInstance, id=bookmark_instance_id)
-    
+
     if request.method == "POST":
         bookmark_form = BookmarkInstanceEditForm(request.user, request.POST, instance=bookmark_instance)
         if bookmark_form.is_valid():
@@ -144,19 +148,18 @@ def edit(request, bookmark_instance_id):
             bookmark_instance.user = request.user
             bookmark_instance.save(edit=True)
 
-            
             if request.POST.get('redirect', None):
                 return HttpResponseRedirect(bookmark_instance.bookmark.url)
             else:
                 request.user.message_set.create(message=_("You have finished editing bookmark '%(description)s'") % {'description': bookmark_instance.description})
                 return HttpResponseRedirect(reverse("bookmarks.views.your_bookmarks"))
     elif request.user == bookmark_instance.user:
-        data = dict(      
+        data = dict(
             description=bookmark_instance.description,
             note=bookmark_instance.note,
             tags=bookmark_instance.tags
         )
-        bookmark_form = BookmarkInstanceEditForm(initial=data) 
+        bookmark_form = BookmarkInstanceEditForm(initial=data)
 
     bookmarks_add_url = "http://" + Site.objects.get_current().domain + reverse(add)
     bookmarklet = "javascript:location.href='%s?url='+encodeURIComponent(location.href)+';description='+encodeURIComponent(document.title)+';redirect=on'" % bookmarks_add_url
@@ -164,4 +167,4 @@ def edit(request, bookmark_instance_id):
     return render_to_response("bookmarks/edit.html", {
         "bookmarklet": bookmarklet,
         "bookmark_form": bookmark_form,
-    }, context_instance=RequestContext(request))        
+    }, context_instance=RequestContext(request))
